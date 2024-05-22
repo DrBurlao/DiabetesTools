@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú para Diabéticos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group button {
+            padding: 10px 20px;
+            border: none;
+            background: #5cb85c;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .form-group button:hover {
+            background: #4cae4c;
+        }
+        .list-container h2, .history h2, .charts h2 {
+            margin-top: 0;
+        }
+        .list-container ul, .history ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .list-container li, .history li {
+            background: #e9ecef;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            position: relative;
+        }
+        .list-container li button, .history li button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #d9534f;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .list-container li button:hover, .history li button:hover {
+            background: #c9302c;
+        }
+        .edit-button {
+            right: 60px;
+            background: #f0ad4e;
+        }
+        .edit-button:hover {
+            background: #ec971f;
+        }
+        .meal-block {
+            margin-bottom: 30px;
+        }
+        .chart-container {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Diseñador de Menús para Diabéticos</h1>
+        
+        <!-- Formulario para agregar alimentos -->
+        <div class="form-group">
+            <h2>Base de Datos de Alimentos</h2>
+            <label for="food-name">Nombre del Alimento:</label>
+            <input type="text" id="food-name" placeholder="Nombre del alimento" required>
+            <label for="food-carbs">Carbohidratos (g):</label>
+            <input type="number" id="food-carbs" placeholder="Cantidad de carbohidratos en gramos" required min="0">
+            <button onclick="handleAddFood()">Agregar Alimento</button>
+            <div class="list-container">
+                <h2>Alimentos Disponibles</h2>
+                <ul id="food-list"></ul>
+            </div>
+        </div>
+
+        <!-- Formulario para agregar comidas -->
+        <div class="form-group">
+            <h2>Agregar Comida</h2>
+            <label for="meal-type">Tipo de Comida:</label>
+            <select id="meal-type" required>
+                <option value="Desayuno">Desayuno</option>
+                <option value="Almuerzo">Almuerzo</option>
+                <option value="Cena">Cena</option>
+                <option value="Merienda">Merienda</option>
+            </select>
+            <label for="meal-description">Descripción:</label>
+            <input type="text" id="meal-description" placeholder="Descripción de la comida" required>
+            <label for="meal-carbs">Carbohidratos (g):</label>
+            <input type="number" id="meal-carbs" placeholder="Cantidad de carbohidratos en gramos" readonly>
+            <button onclick="handleAddMeal()">Agregar</button>
+        </div>
+
+        <!-- Plan de comidas -->
+        <div class="meal-plan">
+            <h2>Plan de Comidas</h2>
+            <div id="meal-blocks"></div>
+        </div>
+
+        <!-- Historial de comidas -->
+        <div class="history">
+            <h2>Historial de Comidas</h2>
+            <ul id="meal-history"></ul>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="charts">
+            <h2>Gráficos Informativos</h2>
+            <div class="chart-container">
+                <canvas id="carbsChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="mealTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Inicialización de la aplicación
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFoods();
+            loadMeals();
+            loadHistory();
+            updateCharts();
+        });
+
+        // Manejar la adición de un nuevo alimento
+        function handleAddFood() {
+            const foodName = document.getElementById('food-name').value.trim();
+            const foodCarbs = document.getElementById('food-carbs').value;
+
+            if (!isValidFood(foodName, foodCarbs)) return;
+
+            const food = { name: foodName, carbs: parseFloat(foodCarbs) };
+            addFoodToLocalStorage(food);
+            clearFoodForm();
+            loadFoods();
+        }
+
+        // Validar alimento
+        function isValidFood(name, carbs) {
+            if (name === '' || carbs === '' || carbs <= 0) {
+                alert('Por favor, complete todos los campos con valores válidos.');
+                return false;
+            }
+            return true;
+        }
+
+        // Agregar alimento a localStorage
+        function addFoodToLocalStorage(food) {
+            const foods = getFoodsFromLocalStorage();
+            foods.push(food);
+            localStorage.setItem('foods', JSON.stringify(foods));
+        }
+
+        // Obtener alimentos de localStorage
+        function getFoodsFromLocalStorage() {
+            return JSON.parse(localStorage.getItem('foods')) || [];
+        }
+
+        // Cargar alimentos en la lista
+        function loadFoods() {
+            const foodList = document.getElementById('food-list');
+            foodList.innerHTML = '';
+
+            const foods = getFoodsFromLocalStorage();
+            foods.forEach((food, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `${food.name} - ${food.carbs}g de carbohidratos 
+                    <button onclick="handleDeleteFood(${index})" aria-label="Eliminar ${food.name}">Eliminar</button>
+                    <button class="edit-button" onclick="handleEditFood(${index})" aria-label="Editar ${food.name}">Editar</button>`;
+                li.onclick = () => selectFoodForMeal(food);
+                foodList.appendChild(li);
+            });
+        }
+
+        // Manejar la eliminación de un alimento
+        function handleDeleteFood(index) {
+            if (!confirm('¿Está seguro de que desea eliminar este alimento?')) return;
+            deleteFoodFromLocalStorage(index);
+            loadFoods();
+        }
+
+        // Eliminar alimento de localStorage
+        function deleteFoodFromLocalStorage(index) {
+            const foods = getFoodsFromLocalStorage();
+            foods.splice(index, 1);
+            localStorage.setItem('foods', JSON.stringify(foods));
+        }
+
+        // Manejar la edición de un alimento
+        function handleEditFood(index) {
+            const foods = getFoodsFromLocalStorage();
+            const food = foods[index];
+            document.getElementById('food-name').value = food.name;
+            document.getElementById('food-carbs').value = food.carbs;
+            handleDeleteFood(index);
+        }
+
+        // Seleccionar un alimento para agregarlo a una comida
+        function selectFoodForMeal(food) {
+            document.getElementById('meal-description').value = food.name;
+            document.getElementById('meal-carbs').value = food.carbs;
+        }
+
+        // Limpiar formulario de alimentos
+        function clearFoodForm() {
+            document.getElementById('food-name').value = '';
+            document.getElementById('food-carbs').value = '';
+        }
+
+        // Manejar la adición de una nueva comida
+        function handleAddMeal() {
+            const mealType = document.getElementById('meal-type').value;
+            const mealDescription = document.getElementById('meal-description').value.trim();
+            const mealCarbs = document.getElementById('meal-carbs').value;
+
+            if (!isValidMeal(mealDescription, mealCarbs)) return;
+
+            const meal = {
+                type: mealType,
+                description: mealDescription,
+                carbs: parseFloat(mealCarbs),
+                time: new Date().toLocaleString()
+            };
+
+            addMealToLocalStorage(meal);
+            clearMealForm();
+            loadMeals();
+            updateCharts();
+        }
+
+        // Validar comida
+        function isValidMeal(description, carbs) {
+            if (description === '' || carbs === '' || carbs <= 0) {
+                alert('Por favor, complete todos los campos con valores válidos.');
+                return false;
+            }
+            return true;
+        }
+
+        // Agregar comida a localStorage
+        function addMealToLocalStorage(meal) {
+            const meals = getMealsFromLocalStorage();
+            meals.push(meal);
+            localStorage.setItem('meals', JSON.stringify(meals));
+        }
+
+        // Obtener comidas de localStorage
+        function getMealsFromLocalStorage() {
+            return JSON.parse(localStorage.getItem('meals')) || [];
+        }
+
+        // Cargar comidas desde localStorage
+        function loadMeals() {
+            const mealBlocks = document.getElementById('meal-blocks');
+            mealBlocks.innerHTML = '';
+
+            const meals = getMealsFromLocalStorage();
+            meals.forEach((meal, index) => {
+                const mealBlock = document.createElement('div');
+                mealBlock.classList.add('meal-block');
+                mealBlock.innerHTML = `
+                    <h3>${meal.type}</h3>
+                    <p><strong>Descripción:</strong> ${meal.description}</p>
+                    <p><strong>Carbohidratos:</strong> ${meal.carbs}g</p>
+                    <p><strong>Hora:</strong> ${meal.time}</p>
+                    <button onclick="handleDeleteMeal(${index})" aria-label="Eliminar ${meal.description}">Eliminar</button>`;
+                mealBlocks.appendChild(mealBlock);
+            });
+        }
+
+        // Manejar la eliminación de una comida
+        function handleDeleteMeal(index) {
+            if (!confirm('¿Está seguro de que desea eliminar esta comida?')) return;
+            deleteMealFromLocalStorage(index);
+            loadMeals();
+            updateCharts();
+        }
+
+        // Eliminar comida de localStorage
+        function deleteMealFromLocalStorage(index) {
+            const meals = getMealsFromLocalStorage();
+            meals.splice(index, 1);
+            localStorage.setItem('meals', JSON.stringify(meals));
+        }
+
+        // Limpiar formulario de comidas
+        function clearMealForm() {
+            document.getElementById('meal-description').value = '';
+            document.getElementById('meal-carbs').value = '';
+        }
+
+        // Cargar historial de comidas
+        function loadHistory() {
+            const mealHistory = document.getElementById('meal-history');
+            mealHistory.innerHTML = '';
+
+            const meals = getMealsFromLocalStorage();
+            meals.forEach(meal => {
+                const li = document.createElement('li');
+                li.innerHTML = `${meal.type} - ${meal.description} - ${meal.carbs}g de carbohidratos - ${meal.time}`;
+                mealHistory.appendChild(li);
+            });
+        }
+
+        // Actualizar gráficos
+        function updateCharts() {
+            const ctxCarbs = document.getElementById('carbsChart').getContext('2d');
+            const ctxMealType = document.getElementById('mealTypeChart').getContext('2d');
+
+            const meals = getMealsFromLocalStorage();
+            const labels = meals.map(meal => meal.time);
+            const dataCarbs = meals.map(meal => meal.carbs);
+
+            // Agrupar carbohidratos por tipo de comida
+            const mealTypes = ['Desayuno', 'Almuerzo', 'Cena', 'Merienda'];
+            const dataMealType = mealTypes.map(type => meals.filter(meal => meal.type === type).reduce((total, meal) => total + meal.carbs, 0));
+
+            new Chart(ctxCarbs, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Carbohidratos Consumidos',
+                        data: dataCarbs,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            new Chart(ctxMealType, {
+                type: 'bar',
+                data: {
+                    labels: mealTypes,
+                    datasets: [{
+                        label: 'Carbohidratos por Tipo de Comida',
+                        data: dataMealType,
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
