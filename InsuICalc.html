@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Insulina</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f4;
+    }
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+    h2, h3 {
+        text-align: center;
+        color: #333;
+    }
+    form {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    input[type="number"], select {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin: 10px 0;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    input[type="submit"], #clear-history, #save-ratios {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-top: 10px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    input[type="submit"]:hover, #clear-history:hover, #save-ratios:hover {
+        background-color: #45a049;
+    }
+    #resultado, #resultado-rapida {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        text-align: center;
+    }
+    #historial {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+    }
+    #consejos {
+        margin-top: 20px;
+    }
+    #consejos h3 {
+        color: #4CAF50;
+    }
+    #consejos ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    #consejos li {
+        background-color: #e7f3e7;
+        border: 1px solid #d4e7d4;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+    }
+    .highlight {
+        font-weight: bold;
+        color: #4CAF50;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h2>Calculadora de Insulina</h2>
+        <h3>Insulina Basal</h3>
+        <form id="basalForm">
+            <label for="peso">Peso corporal (kg):</label>
+            <input type="number" id="peso" name="peso" min="0" step="0.1" required>
+            <input type="submit" value="Calcular dosis basal">
+        </form>
+        <div id="resultado"></div>
+
+        <h3>Insulina Rápida</h3>
+        <form id="rapidaForm">
+            <label for="meal">Selecciona la comida:</label>
+            <select id="meal" name="meal" required>
+                <option value="desayuno">Desayuno</option>
+                <option value="almuerzo">Almuerzo</option>
+                <option value="merienda">Merienda</option>
+                <option value="cena">Cena</option>
+            </select>
+            <label for="carbs">Gramos de carbohidratos (HC):</label>
+            <input type="number" id="carbs" name="carbs" min="0" step="0.1" required>
+            <input type="submit" value="Calcular dosis rápida">
+        </form>
+        <div id="resultado-rapida"></div>
+
+        <h3>Configurar proporciones insulina/HC</h3>
+        <form id="ratioForm">
+            <label for="ratioDesayuno">Desayuno (1u por Xg):</label>
+            <input type="number" id="ratioDesayuno" name="ratioDesayuno" min="0" step="0.1" required>
+            <label for="ratioAlmuerzo">Almuerzo (1u por Xg):</label>
+            <input type="number" id="ratioAlmuerzo" name="ratioAlmuerzo" min="0" step="0.1" required>
+            <label for="ratioMerienda">Merienda (1u por Xg):</label>
+            <input type="number" id="ratioMerienda" name="ratioMerienda" min="0" step="0.1" required>
+            <label for="ratioCena">Cena (1u por Xg):</label>
+            <input type="number" id="ratioCena" name="ratioCena" min="0" step="0.1" required>
+            <button type="button" id="save-ratios">Guardar proporciones</button>
+        </form>
+
+        <div id="historial">
+            <h3>Historial de dosis calculadas:</h3>
+            <ul id="historial-list"></ul>
+            <button id="clear-history">Limpiar historial</button>
+        </div>
+        <div id="consejos">
+            <h3>Consejos para el manejo de la diabetes:</h3>
+            <ul>
+                <li>Mantén un registro de tus niveles de azúcar en sangre y de las dosis de insulina que tomas.</li>
+                <li>Consulta regularmente a tu médico para ajustar tus dosis de insulina según sea necesario.</li>
+                <li>Lleva siempre contigo alimentos con carbohidratos de rápida absorción en caso de hipoglucemia.</li>
+                <li>Realiza ejercicio físico regularmente, pero asegúrate de monitorizar tus niveles de azúcar antes y después.</li>
+                <li>Evita el consumo excesivo de alimentos con alto contenido de azúcares simples.</li>
+                <li>Aprende a identificar los signos de hipoglucemia e hiperglucemia y actúa rápidamente.</li>
+                <li>Consulta con un nutricionista para crear un plan de alimentación adecuado.</li>
+                <li>Hidrátate adecuadamente y evita el alcohol en exceso.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            loadRatios();
+            loadHistorial();
+
+            document.getElementById("basalForm").addEventListener("submit", function(event) {
+                event.preventDefault();
+                var peso = parseFloat(document.getElementById("peso").value);
+                if (isNaN(peso) || peso <= 0) {
+                    document.getElementById("resultado").innerHTML = "<p style='color: red;'>Por favor, ingresa un peso válido.</p>";
+                    return;
+                }
+                var dosisBasal = calcularDosisBasal(peso);
+                document.getElementById("resultado").innerHTML = "<p>La dosis recomendada de insulina basal es: <span class='highlight'>" + dosisBasal + "</span> unidades.</p>";
+                agregarAHistorialBasal(peso, dosisBasal);
+            });
+
+            document.getElementById("rapidaForm").addEventListener("submit", function(event) {
+                event.preventDefault();
+                var meal = document.getElementById("meal").value;
+                var carbs = parseFloat(document.getElementById("carbs").value);
+                var ratios = loadRatios();
+                var ratio = ratios[meal];
+                if (isNaN(carbs) || carbs <= 0 || isNaN(ratio) || ratio <= 0) {
+                    document.getElementById("resultado-rapida").innerHTML = "<p style='color: red;'>Por favor, ingresa valores válidos.</p>";
+                    return;
+                }
+                var dosisRapida = calcularDosisRapida(carbs, ratio);
+                document.getElementById("resultado-rapida").innerHTML = "<p>La dosis recomendada de insulina rápida para <span class='highlight'>" + meal + "</span> es: <span class='highlight'>" + dosisRapida + "</span> unidades.</p>";
+                agregarAHistorialRapida(carbs, ratio, dosisRapida, meal);
+            });
+
+            document.getElementById("save-ratios").addEventListener("click", function() {
+                var ratios = {
+                    desayuno: parseFloat(document.getElementById("ratioDesayuno").value),
+                    almuerzo: parseFloat(document.getElementById("ratioAlmuerzo").value),
+                    merienda: parseFloat(document.getElementById("ratioMerienda").value),
+                    cena: parseFloat(document.getElementById("ratioCena").value)
+                };
+                if (Object.values(ratios).some(isNaN)) {
+                    alert("Por favor, ingresa valores válidos para todas las proporciones.");
+                    return;
+                }
+                localStorage.setItem("ratios", JSON.stringify(ratios));
+                alert("Proporciones guardadas exitosamente.");
+            });
+
+            document.getElementById("clear-history").addEventListener("click", function() {
+                localStorage.removeItem("historial");
+                loadHistorial();
+            });
+        });
+
+        function calcularDosisBasal(peso) {
+            var dosis = peso * 0.6; // Ejemplo: 0.6 unidades por kg de peso corporal
+            return dosis.toFixed(2);
+        }
+
+        function calcularDosisRapida(carbs, ratio) {
+            var dosis = carbs / ratio;
+            return dosis.toFixed(2);
+        }
+
+        function agregarAHistorialBasal(peso, dosis) {
+            var historial = JSON.parse(localStorage.getItem("historial")) || [];
+            var item = {
+                tipo: "basal",
+                peso: peso,
+                dosis: dosis,
+                timestamp: new Date().toLocaleString()
+            };
+            historial.push(item);
+            localStorage.setItem("historial", JSON.stringify(historial));
+            loadHistorial();
+        }
+
+        function agregarAHistorialRapida(carbs, ratio, dosis, meal) {
+            var historial = JSON.parse(localStorage.getItem("historial")) || [];
+            var item = {
+                tipo: "rapida",
+                carbs: carbs,
+                ratio: ratio,
+                dosis: dosis,
+                meal: meal,
+                timestamp: new Date().toLocaleString()
+            };
+            historial.push(item);
+            localStorage.setItem("historial", JSON.stringify(historial));
+            loadHistorial();
+        }
+
+        function loadHistorial() {
+            var historial = JSON.parse(localStorage.getItem("historial")) || [];
+            var historialList = document.getElementById("historial-list");
+            historialList.innerHTML = "";
+            historial.forEach(function(item) {
+                var listItem = document.createElement("li");
+                if (item.tipo === "basal") {
+                    listItem.textContent = `Basal - Peso: ${item.peso} kg - Dosis: ${item.dosis} unidades - ${item.timestamp}`;
+                } else {
+                    listItem.textContent = `Rápida - ${item.meal} - Carbohidratos: ${item.carbs} g - Ratio: 1/${item.ratio} - Dosis: ${item.dosis} unidades - ${item.timestamp}`;
+                }
+                historialList.appendChild(listItem);
+            });
+        }
+
+        function loadRatios() {
+            var ratios = JSON.parse(localStorage.getItem("ratios")) || {
+                desayuno: 10,
+                almuerzo: 10,
+                merienda: 10,
+                cena: 10
+            };
+            document.getElementById("ratioDesayuno").value = ratios.desayuno;
+            document.getElementById("ratioAlmuerzo").value = ratios.almuerzo;
+            document.getElementById("ratioMerienda").value = ratios.merienda;
+            document.getElementById("ratioCena").value = ratios.cena;
+            return ratios;
+        }
+    </script>
+</body>
+</html>
