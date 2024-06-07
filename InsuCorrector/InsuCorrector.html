@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InsuCorrector</title>
+<style>
+    @keyframes fadeIn {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideIn {
+        0% {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    body {
+        font-family: 'Press Start 2P', cursive;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+        color: #333;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    h2 {
+        text-align: center;
+        font-size: 24px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    label {
+        font-weight: bold;
+    }
+    input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f0f0f0;
+        color: #333;
+        font-family: 'Press Start 2P', cursive;
+    }
+    input[type="submit"] {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #4caf50;
+        color: #fff;
+        cursor: pointer;
+        font-family: 'Press Start 2P', cursive;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        transition: background-color 0.3s ease;
+    }
+    input[type="submit"]:hover {
+        background-color: #2e7d32;
+    }
+    #result {
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #666;
+        border-radius: 5px;
+        text-align: center;
+        animation: slideIn 0.5s ease forwards, fadeIn 0.5s ease forwards;
+        opacity: 0;
+    }
+    .dark-mode {
+        background-color: #222;
+        color: #fff;
+    }
+    .dark-mode .container {
+        background-color: #333;
+    }
+    .dark-mode input[type="number"],
+    .dark-mode input[type="submit"] {
+        background-color: #444;
+        border-color: #555;
+        color: #fff;
+    }
+    .dark-mode #result {
+        background-color: #666;
+    }
+    .toggle-dark-mode {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background-color: #fff;
+        border: 2px solid #333;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.3s ease;
+    }
+    .toggle-dark-mode:hover {
+        background-color: #f0f0f0;
+    }
+    .toggle-dark-mode::before {
+        content: '☀️';
+        font-size: 20px;
+    }
+    .dark-mode .toggle-dark-mode::before {
+        content: '🌙';
+    }
+    @media screen and (max-width: 400px) {
+        .container {
+            max-width: 100%;
+            border-radius: 0;
+        }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>InsuCorrector</h2>
+    <form id="insulinForm">
+        <label for="currentSugar">Azúcar en Sangre Actual (mg/dL):</label>
+        <input type="number" id="currentSugar" required><br>
+        <label for="targetSugar">Azúcar en Sangre Objetivo (mg/dL):</label>
+        <input type="number" id="targetSugar" required><br>
+        <label for="insulinSensitivity">Sensibilidad a la Insulina (mg/dL por unidad de insulina):</label>
+        <input type="number" id="insulinSensitivity" required><br>
+        <input type="submit" value="Calcular Dosis de Insulina">
+    </form>
+    <div id="result"></div>
+</div>
+
+<div class="toggle-dark-mode" onclick="toggleDarkMode()"></div>
+
+<script>
+    // Función para cambiar entre modos claro y oscuro
+    function toggleDarkMode() {
+        var body = document.body;
+        body.classList.toggle('dark-mode');
+    }
+
+    // Cargar valores almacenados
+    window.addEventListener('load', function() {
+        if(localStorage.getItem('currentSugar')) {
+            document.getElementById('currentSugar').value = localStorage.getItem('currentSugar');
+        }
+        if(localStorage.getItem('targetSugar')) {
+            document.getElementById('targetSugar').value = localStorage.getItem('targetSugar');
+        }
+        if(localStorage.getItem('insulinSensitivity')) {
+            document.getElementById('insulinSensitivity').value = localStorage.getItem('insulinSensitivity');
+        }
+    });
+
+    // Al enviar el formulario, calcular la dosis de insulina
+    document.getElementById('insulinForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var currentSugar = parseFloat(document.getElementById('currentSugar').value);
+        var targetSugar = parseFloat(document.getElementById('targetSugar').value);
+        var insulinSensitivity = parseFloat(document.getElementById('insulinSensitivity').value);
+
+        var insulinDose = (currentSugar - targetSugar) / insulinSensitivity;
+        
+        var resultElement = document.getElementById('result');
+        resultElement.innerHTML = "<p><strong>Dosis de Insulina necesaria:</strong> " + insulinDose.toFixed(2) + " unidades</p>";
+        resultElement.style.opacity = 1;
+
+        // Almacenar valores en Local Storage
+        localStorage.setItem('currentSugar', currentSugar);
+        localStorage.setItem('targetSugar', targetSugar);
+        localStorage.setItem('insulinSensitivity', insulinSensitivity);
+    });
+</script>
+
+</body>
+</html>

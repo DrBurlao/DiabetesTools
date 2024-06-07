@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Guide - InsuCorrector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #007bff;
+        }
+        ul, ol {
+            text-align: left;
+            padding-left: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2e59d9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to InsuCorrector</h1>
+        <p>InsuCorrector is a tool for calculating insulin dose based on current blood sugar, target blood sugar, and insulin sensitivity. Follow these steps to use InsuCorrector:</p>
+        
+        <h2>How to Use:</h2>
+        <ol>
+            <li><strong>Enter Current Blood Sugar:</strong> Enter your current blood sugar level (mg/dL) in the input field labeled "Current Blood Sugar."</li>
+            <li><strong>Enter Target Blood Sugar:</strong> Enter your target blood sugar level (mg/dL) in the input field labeled "Target Blood Sugar."</li>
+            <li><strong>Enter Insulin Sensitivity:</strong> Enter your insulin sensitivity (mg/dL per unit of insulin) in the input field labeled "Insulin Sensitivity."</li>
+            <li><strong>Calculate Insulin Dose:</strong> Click on the "Calculate Insulin Dose" button to calculate the recommended insulin dose based on the entered values.</li>
+        </ol>
+        
+        <button onclick="goBack()">Go Back</button>
+    </div>
+    
+    <script>
+        function goBack() {
+            window.location.href = "Launcher.html";
+        }
+    </script>
+</body>
+</html>
