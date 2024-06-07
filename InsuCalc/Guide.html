@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Guide - InsuCalc</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #007bff;
+        }
+        ul, ol {
+            text-align: left;
+            padding-left: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #2e59d9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to InsuCalc</h1>
+        <p>InsuCalc is a tool designed to help manage insulin doses for diabetes treatment. Follow these steps to use InsuCalc:</p>
+        
+        <h2>How to Use:</h2>
+        <ol>
+            <li><strong>Calculate Basal Insulin:</strong> Enter your body weight in kilograms and click "Calculate basal dose" to determine your recommended basal insulin dose.</li>
+            <li><strong>Calculate Rapid Insulin:</strong> Select a meal and enter the grams of carbohydrates consumed, then click "Calculate rapid dose" to get your recommended rapid insulin dose.</li>
+            <li><strong>Configure Insulin/HC Ratios:</strong> Set insulin-to-carbohydrate ratios for each meal and save them by clicking "Save ratios".</li>
+            <li><strong>View History:</strong> InsuCalc maintains a history of calculated doses for your reference. Use the "Clear history" button to delete the history.</li>
+            <li><strong>Get Tips:</strong> Check out the "Tips for diabetes management" section for helpful advice on managing diabetes effectively.</li>
+        </ol>
+        
+    </div>
+    
+    <script>
+        function goBack() {
+            window.location.href = "Launcher.html";
+        }
+    </script>
+</body>
+</html>
