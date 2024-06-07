@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BurlaSoft</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            background-color: #333;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            cursor: pointer;
+        }
+        .navbar a:hover {
+            background-color: #575757;
+        }
+        .container {
+            height: calc(100% - 56px); /* Subtract the height of the navbar */
+            padding-top: 56px; /* Compensate for the height of the navbar */
+            background-color: #f2f2f2;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+    <script>
+        function loadPage(page) {
+            document.getElementById('content-frame').src = page;
+        }
+    </script>
+</head>
+<body>
+
+<div class="navbar">
+    <div>
+        <a class="button" onclick="loadPage('Launcher.html')">Home</a>
+        <a class="button" onclick="loadPage('Guide.html')">About</a>
+        <a class="button" onclick="loadPage('Contact.html')">Contact</a>
+    </div>
+    <div>
+        <a class="button" onclick="loadPage('PrivacyPolicy.html')">Privacy Policy</a>
+    </div>
+</div>
+
+<div class="container">
+    <iframe id="content-frame" src="Launcher.html" frameborder="0"></iframe>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugar Menu User Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #121212;
+            color: #fff;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #007bff;
+        }
+        ol {
+            text-align: left;
+            padding-left: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4e73df;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .button:hover {
+            background-color: #2e59d9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Sugar Menu</h1>
+        <p>Sugar Menu is an application designed to help individuals plan meals suitable for diabetes management. Follow these steps to use Sugar Menu:</p>
+        
+        <h2>How to Use:</h2>
+        <ol>
+            <li><strong>Adding Food Items:</strong> Enter the name and carbohydrate content of a food item in the respective fields and click "Add Food" to include it in the database.</li>
+            <li><strong>Creating Meals:</strong> Select the meal type (Breakfast, Lunch, Dinner, Snack), describe the meal, and specify the carbohydrate content. Click "Add" to add the meal to your plan.</li>
+            <li><strong>Viewing Meal Plan:</strong> See your planned meals categorized by type under "Meal Plan".</li>
+            <li><strong>Viewing Meal History:</strong> Check your meal history to track your consumption over time under "Meal History".</li>
+            <li><strong>Analyzing Data:</strong> Explore informative charts displaying carbohydrate consumption trends and meal types under "Informative Charts".</li>
+        </ol>
+        
+        <button class="button" onclick="goBack()">Go Back</button>
+    </div>
+    
+    <script>
+        function goBack() {
+            window.location.href = "Launcher.html";
+        }
+    </script>
+</body>
+</html>

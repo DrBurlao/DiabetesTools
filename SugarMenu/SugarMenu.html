@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SugarMenu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        h1, h2 {
+            color: #ffffff;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #1f1f1f;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+        }
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            border-bottom: 1px solid #444;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: #ccc;
+        }
+        .tab.active {
+            color: #fff;
+            border-bottom: 2px solid #5cb85c;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            background-color: #333;
+            color: #fff;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background: #5cb85c;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #4cae4c;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #2a2a2a;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        li button {
+            float: right;
+            background: #d9534f;
+            margin-left: 10px;
+        }
+        li button:hover {
+            background: #c9302c;
+        }
+        .meal-item {
+            cursor: pointer;
+        }
+        .edit-button, .delete-button {
+            float: right;
+            margin-left: 5px;
+        }
+        .edit-button {
+            background: #f0ad4e;
+        }
+        .edit-button:hover {
+            background: #ec971f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SugarMenu</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('food')">Foods</div>
+            <div class="tab" onclick="openTab('meal')">Meals</div>
+            <div class="tab" onclick="openTab('insulin')">Insulin Calculator</div>
+        </div>
+
+        <div id="food" class="tab-content active">
+            <div class="section">
+                <h2>Food Database</h2>
+                <label for="food-name">Food Name:</label>
+                <input type="text" id="food-name" placeholder="Food name">
+                <label for="food-carbs">Carbohydrates (g):</label>
+                <input type="number" id="food-carbs" placeholder="Carbohydrate amount in grams">
+                <button onclick="addFood()">Add Food</button>
+            </div>
+            <div class="section">
+                <h2>Available Foods</h2>
+                <ul id="food-list"></ul>
+            </div>
+        </div>
+
+        <div id="meal" class="tab-content">
+            <div class="section">
+                <h2>Add Meal</h2>
+                <label for="meal-type">Meal Type:</label>
+                <select id="meal-type">
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Snack">Snack</option>
+                </select>
+                <label for="meal-food">Select Food:</label>
+                <select id="meal-food" onchange="updateMealCarbs()">
+                    <option value="">--Select a food--</option>
+                </select>
+                <label for="meal-description">Description:</label>
+                <input type="text" id="meal-description" placeholder="Meal description" readonly>
+                <label for="meal-carbs">Carbohydrates (g):</label>
+                <input type="number" id="meal-carbs" placeholder="Carbohydrate amount in grams" readonly>
+                <button onclick="addMeal()">Add</button>
+            </div>
+            <div class="section">
+                <h2>Meal Plan</h2>
+                <ul id="meal-list"></ul>
+            </div>
+        </div>
+
+        <div id="insulin" class="tab-content">
+            <div class="section">
+                <h2>Insulin Calculator</h2>
+                <label for="total-carbs">Total Carbohydrates Consumed (g):</label>
+                <input type="number" id="total-carbs" readonly>
+                <label for="carbs-ratio">Carbohydrate to Insulin Ratio:</label>
+                <input type="number" id="carbs-ratio" placeholder="E.g. 10 (1 unit of insulin per 10g of carbohydrates)">
+                <button onclick="calculateInsulin()">Calculate Insulin</button>
+            </div>
+            <div class="section">
+                <h2>Required Insulin</h2>
+                <p id="insulin-needed">0 units</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFoods();
+            loadMeals();
+            updateTotalCarbs();
+        });
+
+        function openTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            document.querySelector(`.tab[onclick="openTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function addFood() {
+            const foodName = document.getElementById('food-name').value;
+            const foodCarbs = document.getElementById('food-carbs').value;
+
+            if (foodName === '' || foodCarbs === '') {
+                alert('Please complete all fields.');
+                return;
+            }
+
+            const food = {
+                name: foodName,
+                carbs: parseFloat(foodCarbs)
+            };
+
+            let foods = JSON.parse(localStorage.getItem('foods')) || [];
+            foods.push(food);
+            localStorage.setItem('foods', JSON.stringify(foods));
+
+            document.getElementById('food-name').value = '';
+            document.getElementById('food-carbs').value = '';
+            loadFoods();
+        }
+
+        function loadFoods() {
+            const foodList = document.getElementById('food-list');
+            foodList.innerHTML = '';
+
+            let foods = JSON.parse(localStorage.getItem('foods')) || [];
+            foods.forEach((food, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    ${food.name} - ${food.carbs}g carbs 
+                    <button class="edit-button" onclick="editFood(${index})">Edit</button>
+                    <button class="delete-button" onclick="deleteFood(${index})">Delete</button>
+                `;
+                foodList.appendChild(li);
+            });
+
+            // Update the food options in meal tab
+            const mealFoodSelect = document.getElementById('meal-food');
+            mealFoodSelect.innerHTML = '<option value="">--Select a food--</option>';
+            foods.forEach((food, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${food.name} - ${food.carbs}g carbs`;
+                mealFoodSelect.appendChild(option);
+            });
+        }
+
+        function deleteFood(index) {
+            let foods = JSON.parse(localStorage.getItem('foods')) || [];
+            foods.splice(index, 1);
+            localStorage.setItem('foods', JSON.stringify(foods));
+            loadFoods();
+        }
+
+        function editFood(index) {
+            let foods = JSON.parse(localStorage.getItem('foods')) || [];
+            const food = foods[index];
+
+            const newName = prompt('Edit food name:', food.name);
+            if (newName === null) return; // User pressed cancel
+
+            const newCarbs = prompt('Edit food carbs:', food.carbs);
+            if (newCarbs === null) return; // User pressed cancel
+
+            food.name = newName;
+            food.carbs = parseFloat(newCarbs);
+
+            localStorage.setItem('foods', JSON.stringify(foods));
+            loadFoods();
+        }
+
+        function updateMealCarbs() {
+            const selectedFoodIndex = document.getElementById('meal-food').value;
+            if (selectedFoodIndex) {
+                let foods = JSON.parse(localStorage.getItem('foods')) || [];
+                const selectedFood = foods[selectedFoodIndex];
+                selectFood(selectedFood);
+            } else {
+                document.getElementById('meal-description').value = '';
+                document.getElementById('meal-carbs').value = '';
+            }
+        }
+
+        function selectFood(food) {
+            document.getElementById('meal-description').value = food.name;
+            document.getElementById('meal-carbs').value = food.carbs;
+        }
+
+        function addMeal() {
+            const mealType = document.getElementById('meal-type').value;
+            const mealDescription = document.getElementById('meal-description').value;
+            const mealCarbs = document.getElementById('meal-carbs').value;
+
+            if (mealDescription === '' || mealCarbs === '') {
+                alert('Please complete all fields.');
+                return;
+            }
+
+            const meal = {
+                type: mealType,
+                description: mealDescription,
+                carbs: parseFloat(mealCarbs)
+            };
+
+            let meals = JSON.parse(localStorage.getItem('meals')) || [];
+            meals.push(meal);
+            localStorage.setItem('meals', JSON.stringify(meals));
+
+            document.getElementById('meal-food').value = '';
+            document.getElementById('meal-description').value = '';
+            document.getElementById('meal-carbs').value = '';
+            loadMeals();
+            updateTotalCarbs();
+        }
+
+        function loadMeals() {
+            const mealList = document.getElementById('meal-list');
+            mealList.innerHTML = '';
+
+            let meals = JSON.parse(localStorage.getItem('meals')) || [];
+
+            const groupedMeals = meals.reduce((acc, meal) => {
+                acc[meal.type] = acc[meal.type] || [];
+                acc[meal.type].push(meal);
+                return acc;
+            }, {});
+
+            for (const [type, meals] of Object.entries(groupedMeals)) {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${type}</strong>`;
+                meals.forEach(meal => {
+                    li.innerHTML += `<p class="meal-item">${meal.description} - ${meal.carbs}g carbs</p>`;
+                });
+                li.innerHTML += `<button onclick="deleteMealsByType('${type}')">Delete ${type}</button>`;
+                mealList.appendChild(li);
+            }
+        }
+
+        function deleteMealsByType(type) {
+            let meals = JSON.parse(localStorage.getItem('meals')) || [];
+            meals = meals.filter(meal => meal.type !== type);
+            localStorage.setItem('meals', JSON.stringify(meals));
+            loadMeals();
+            updateTotalCarbs();
+        }
+
+        function updateTotalCarbs() {
+            let meals = JSON.parse(localStorage.getItem('meals')) || [];
+            const totalCarbs = meals.reduce((total, meal) => total + meal.carbs, 0);
+            document.getElementById('total-carbs').value = totalCarbs;
+        }
+
+        function calculateInsulin() {
+            const totalCarbs = document.getElementById('total-carbs').value;
+            const carbsRatio = document.getElementById('carbs-ratio').value;
+
+            if (carbsRatio === '' || carbsRatio <= 0) {
+                alert('Please enter a valid ratio.');
+                return;
+            }
+
+            const insulinNeeded = totalCarbs / carbsRatio;
+            document.getElementById('insulin-needed').innerText = `${insulinNeeded.toFixed(2)} units`;
+        }
+    </script>
+</body>
+</html>
